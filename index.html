@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ANSHU CAR CHASE | MEGA EDITION</title>
+    <title>ANSHU CAR CHASE | SWIPE PRO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&display=swap');
@@ -13,53 +13,58 @@
             font-family: 'Orbitron', sans-serif;
             overflow: hidden;
             touch-action: none;
+            user-select: none;
         }
 
         #game-canvas { width: 100vw; height: 100vh; display: block; }
 
-        .neon-red { text-shadow: 0 0 10px #ff0040, 0 0 20px #ff0040; color: #ff0040; }
-        .neon-blue { text-shadow: 0 0 10px #00f2ff, 0 0 20px #00f2ff; color: #00f2ff; }
+        .neon-text { text-shadow: 0 0 15px #ff0040, 0 0 30px #ff0040; color: white; }
         
         .glass {
             background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
         }
 
-        /* Landscape Orientation Check */
         @media screen and (orientation: portrait) {
             #rotate-overlay { display: flex !important; }
             #ui-layer { display: none; }
         }
 
-        /* Control Buttons */
-        .btn-ctrl {
-            width: 90px; height: 90px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 20px;
+        /* Action Buttons */
+        .action-btn {
+            width: 120px; height: 120px;
+            border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            font-size: 2.5rem; color: white;
-            transition: 0.1s;
+            font-weight: 900; text-transform: uppercase;
+            font-size: 0.8rem; letter-spacing: 2px;
+            transition: transform 0.1s, box-shadow 0.1s;
+            pointer-events: auto;
         }
-        .btn-ctrl:active {
-            transform: scale(0.9);
-            background: rgba(0, 242, 255, 0.3);
-            border-color: #00f2ff;
+        
+        #btn-nitro {
+            background: rgba(0, 242, 255, 0.2);
+            border: 4px solid #00f2ff;
+            color: #00f2ff;
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.4);
         }
+        #btn-nitro:active { transform: scale(0.9); background: #00f2ff; color: black; }
 
-        #load-bar-fill {
-            transition: width 0.4s ease-in-out;
-            background: linear-gradient(90deg, #ff0040, #00f2ff);
+        #btn-brake {
+            background: rgba(255, 0, 64, 0.2);
+            border: 4px solid #ff0040;
+            color: #ff0040;
+            box-shadow: 0 0 20px rgba(255, 0, 64, 0.4);
         }
+        #btn-brake:active { transform: scale(0.9); background: #ff0040; color: black; }
 
-        .cam-btn {
-            border: 2px solid #00f2ff;
-            box-shadow: 0 0 10px #00f2ff;
+        #load-fill {
+            background: linear-gradient(90deg, #00f2ff, #ff0040);
+            transition: width 0.3s;
         }
     </style>
 </head>
-<body class="bg-black">
+<body>
 
     <canvas id="game-canvas"></canvas>
 
@@ -68,83 +73,75 @@
         
         <!-- Loading Screen -->
         <div id="screen-loading" class="absolute inset-0 flex flex-col items-center justify-center bg-black pointer-events-auto">
-            <h1 class="text-7xl font-black italic neon-red mb-6 animate-pulse">ANSHU</h1>
-            <div class="w-72 h-2 bg-gray-800 rounded-full overflow-hidden">
-                <div id="load-bar-fill" class="h-full w-0"></div>
+            <h1 class="text-7xl font-black italic neon-text mb-6">ANSHU</h1>
+            <div class="w-72 h-3 bg-zinc-900 rounded-full overflow-hidden border border-zinc-700">
+                <div id="load-fill" class="h-full w-0"></div>
             </div>
-            <p id="load-status" class="text-gray-500 text-[10px] mt-4 uppercase tracking-[0.5em]">Loading GLB Assets...</p>
+            <p id="load-status" class="text-zinc-500 text-[10px] mt-6 uppercase tracking-[0.5em]">Syncing 3D Models...</p>
         </div>
 
-        <!-- Start Menu -->
+        <!-- Main Menu -->
         <div id="screen-menu" class="absolute inset-0 flex flex-col items-center justify-center hidden pointer-events-auto">
-            <div class="glass p-12 rounded-[3rem] text-center max-w-sm w-full border-t-4 border-red-600">
-                <h1 class="text-6xl font-black italic text-white mb-2 tracking-tighter neon-red">ANSHU</h1>
-                <p class="text-blue-400 text-[10px] tracking-[0.8em] uppercase mb-12">Car Chase 3D</p>
+            <div class="glass p-12 rounded-[3rem] text-center max-w-sm w-full border-b-8 border-cyan-500">
+                <h1 class="text-6xl font-black italic text-white mb-2 neon-text">ANSHU</h1>
+                <p class="text-red-500 text-[10px] tracking-[0.6em] uppercase mb-12">Swipe Car Chase</p>
                 
-                <button id="btn-play" class="w-full bg-white text-black font-black py-5 rounded-2xl hover:bg-red-600 hover:text-white transition-all transform hover:scale-105 uppercase tracking-widest mb-6">
-                    ▶ Start Engine
+                <button id="btn-play" class="w-full bg-white text-black font-black py-5 rounded-2xl hover:bg-red-600 hover:text-white transition-all transform hover:scale-105 uppercase tracking-widest mb-4">
+                    ▶ Start Game
                 </button>
-                
-                <div class="grid grid-cols-2 gap-4">
-                    <button id="btn-fs" class="glass text-white py-3 rounded-xl text-xs uppercase font-bold">Fullscreen</button>
-                    <button id="btn-difficulty" class="glass text-white py-3 rounded-xl text-xs uppercase font-bold">Easy</button>
-                </div>
+                <p class="text-[8px] text-zinc-500 uppercase tracking-widest">Swipe Screen to Steering</p>
             </div>
         </div>
 
-        <!-- HUD -->
+        <!-- In-Game HUD -->
         <div id="hud" class="absolute inset-x-0 top-0 p-8 flex justify-between items-start hidden">
             <div class="flex flex-col gap-3">
-                <div class="glass px-6 py-3 rounded-2xl border-l-4 border-yellow-500">
-                    <p class="text-gray-400 text-[10px] uppercase font-bold">Coins</p>
-                    <p id="hud-coins" class="text-3xl font-black text-yellow-400">0</p>
+                <div class="glass px-6 py-2 rounded-xl border-l-4 border-yellow-500">
+                    <p class="text-zinc-500 text-[8px] font-bold uppercase">Cash</p>
+                    <p id="hud-coins" class="text-2xl font-black text-yellow-400">$ 0</p>
                 </div>
-                <div class="glass px-6 py-3 rounded-2xl border-l-4 border-blue-500">
-                    <p id="hud-dist" class="text-xl font-bold text-white">0 m</p>
-                </div>
+                <div class="text-white text-xs tracking-widest px-2"><span id="hud-dist">0</span> m</div>
             </div>
 
-            <div class="flex flex-col items-end gap-4">
-                <button id="btn-cam" class="cam-btn glass px-6 py-3 rounded-xl text-xs font-black text-cyan-400 uppercase pointer-events-auto">📷 View Mode</button>
+            <div class="flex flex-col items-end gap-3">
+                <button id="btn-cam" class="glass px-4 py-2 rounded-lg text-[10px] font-bold text-white uppercase pointer-events-auto border-cyan-500 border">Camera</button>
                 <div class="glass px-8 py-4 rounded-3xl border-r-4 border-red-600 text-right">
-                    <p class="text-gray-400 text-[9px] uppercase font-bold">Speed</p>
                     <p id="hud-speed" class="text-5xl font-black italic text-white">0</p>
-                    <p class="text-red-500 text-[10px] uppercase font-bold">km/h</p>
+                    <p class="text-red-500 text-[10px] font-bold uppercase">KM/H</p>
                 </div>
             </div>
         </div>
 
-        <!-- Controls -->
-        <div id="controls" class="absolute inset-x-0 bottom-10 px-12 flex justify-between items-end hidden pointer-events-auto">
-            <div class="flex gap-8">
-                <button id="ctrl-left" class="btn-ctrl">⬅</button>
-                <button id="ctrl-right" class="btn-ctrl">➡</button>
-            </div>
-            <button id="ctrl-brake" class="w-40 h-20 glass border-2 border-red-600 text-red-500 font-black uppercase rounded-2xl">Brake</button>
+        <!-- Nitro & Brake Controls -->
+        <div id="controls-active" class="absolute inset-x-0 bottom-10 px-12 flex justify-between items-end hidden">
+            <div id="btn-nitro" class="action-btn">Nitro</div>
+            <div id="btn-brake" class="action-btn">Brake</div>
         </div>
 
         <!-- Game Over -->
-        <div id="screen-over" class="absolute inset-0 flex flex-col items-center justify-center bg-black/90 hidden pointer-events-auto">
-            <h2 class="text-8xl font-black italic text-red-600 mb-2 neon-red animate-bounce">BUSTED</h2>
-            <p class="text-white text-xl tracking-widest uppercase mb-12">The police Rammed you!</p>
-            
-            <div class="glass p-10 rounded-3xl mb-10 w-80 text-center border-b-4 border-yellow-500">
-                <p class="text-gray-400 uppercase text-xs mb-2">Final Distance</p>
+        <div id="screen-over" class="absolute inset-0 flex flex-col items-center justify-center bg-black/95 hidden pointer-events-auto">
+            <h2 class="text-8xl font-black italic text-red-600 mb-2 neon-text leading-none">BUSTED</h2>
+            <div class="glass p-10 rounded-3xl my-10 w-72 text-center border-t-4 border-yellow-500">
+                <p class="text-zinc-500 uppercase text-xs">Score</p>
                 <p id="final-score" class="text-5xl font-black text-white">0</p>
             </div>
-
-            <button id="btn-restart" class="bg-white text-black font-black px-16 py-5 rounded-full text-2xl hover:bg-red-600 hover:text-white transition-all transform active:scale-95 uppercase">
-                Try Again
-            </button>
+            <button id="btn-retry" class="bg-white text-black font-black px-12 py-4 rounded-full text-xl uppercase tracking-widest">Retry</button>
         </div>
 
     </div>
 
-    <!-- Rotation Warning -->
-    <div id="rotate-overlay" class="fixed inset-0 bg-zinc-950 z-[100] hidden flex-col items-center justify-center text-center p-12">
-        <div class="text-8xl mb-8 animate-spin">📱</div>
-        <h2 class="text-white text-3xl font-black uppercase tracking-widest">Rotate Device</h2>
-        <p class="text-gray-500 mt-4">Please hold your phone in Landscape to drive.</p>
+    <!-- Rotate Warning -->
+    <div id="rotate-overlay" class="fixed inset-0 bg-black z-[100] hidden flex-col items-center justify-center text-center p-10">
+        <div class="text-7xl mb-6 animate-spin">📱</div>
+        <h2 class="text-white text-2xl font-black uppercase tracking-widest">Landscape Mode</h2>
+        <p class="text-zinc-500 mt-2">Rotate your phone to start the chase!</p>
+    </div>
+
+    <!-- Sounds (Mixkit Assets) -->
+    <div class="hidden">
+        <audio id="snd-engine" loop src="https://assets.mixkit.co/sfx/preview/mixkit-car-engine-loop-2539.mp3"></audio>
+        <audio id="snd-nitro" src="https://assets.mixkit.co/sfx/preview/mixkit-fire-torch-whoosh-1334.mp3"></audio>
+        <audio id="snd-crash" src="https://assets.mixkit.co/sfx/preview/mixkit-car-heavy-crash-936.mp3"></audio>
     </div>
 
     <script type="importmap">
@@ -160,20 +157,21 @@
         import * as THREE from 'three';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-        class AnshuCarChase {
+        const FLOWER_SVG = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSIyMCIgZmlsbD0iI2ZmZCIvPjxwYXRoIGQ9Ik01MCAwIEM2MCAzMCA5MCA0MCA5MCA1MCBDOTAgNjAgNjAgNzAgNTAgMTAwIEM0MCA3MCAxMCA2MCAxMCA1MCBDMTAgNDAgNDAgMzAgNTAgMFoiIGZpbGw9IiNmZjAwNmYiIG9wYWNpdHk9IjAuOCIvPjxwYXRoIGQ9Ik0wIDUwIEMzMCA0MCA0MCAxMCA1MCAxMCBDNjAgMTAgNzAgNDAgMTAwIDUwIEM3MCA2MCA2MCA5MCA1MCA5MCBDNDAgOTAgMzAgNjAgMCA1MFoiIGZpbGw9IiNmZjAwNmYiIG9wYWNpdHk9IjAuOCIvPjwvc3ZnPg==`;
+
+        class AnshuChaseSwipe {
             constructor() {
-                this.init();
+                this.initEngine();
                 this.loadAssets();
-                this.bindUI();
+                this.setupInputs();
             }
 
-            init() {
-                // Scene Setup
+            initEngine() {
                 this.scene = new THREE.Scene();
                 this.scene.background = new THREE.Color(0x87ceeb);
-                this.scene.fog = new THREE.Fog(0x87ceeb, 100, 300);
+                this.scene.fog = new THREE.Fog(0x87ceeb, 100, 500);
 
-                this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 3000);
+                this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 2000);
                 this.renderer = new THREE.WebGLRenderer({ 
                     canvas: document.getElementById('game-canvas'),
                     antialias: true 
@@ -182,15 +180,10 @@
                 this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
                 this.renderer.shadowMap.enabled = true;
 
-                // Lights
-                this.scene.add(new THREE.AmbientLight(0xffffff, 0.7));
-                const sun = new THREE.DirectionalLight(0xffffff, 1.3);
-                sun.position.set(50, 100, 50);
+                this.scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+                const sun = new THREE.DirectionalLight(0xffffff, 1.2);
+                sun.position.set(100, 200, 100);
                 sun.castShadow = true;
-                sun.shadow.camera.left = -200;
-                sun.shadow.camera.right = 200;
-                sun.shadow.camera.top = 200;
-                sun.shadow.camera.bottom = -200;
                 this.scene.add(sun);
 
                 // Game State
@@ -199,118 +192,121 @@
                 this.speed = 0;
                 this.dist = 0;
                 this.coins = 0;
-                this.camMode = 0; // 0: Chase, 1: Top, 2: Action
-                this.lanePos = 0;
-                this.targetLane = 0;
+                this.camMode = 0;
+                this.laneIdx = 1; // 0, 1, 2
+                this.lanes = [-22, 0, 22];
+                this.targetX = 0;
+                this.currentX = 0;
+                
+                this.nitroActive = false;
+                this.brakeActive = false;
+
                 this.roadTiles = [];
                 this.traffic = [];
                 this.items = [];
                 this.clock = new THREE.Clock();
-                this.keys = { left: false, right: false, brake: false };
-                
-                window.addEventListener('resize', () => this.onResize());
             }
 
             loadAssets() {
                 const manager = new THREE.LoadingManager();
                 const loader = new GLTFLoader(manager);
-                const bar = document.getElementById('load-bar-fill');
+                const bar = document.getElementById('load-fill');
 
                 manager.onProgress = (u, l, t) => bar.style.width = (l/t*100) + '%';
                 manager.onLoad = () => {
                     document.getElementById('screen-loading').classList.add('hidden');
                     document.getElementById('screen-menu').classList.remove('hidden');
-                    this.setupWorld();
+                    this.initWorld();
                 };
 
-                // Using your exact filenames
                 const files = [
-                    { id: 'player', url: 'CAR%20Model.glb' },
-                    { id: 'police', url: 'Police%20Car.glb' },
-                    { id: 'block', url: 'Road%20block.glb' },
-                    { id: 'tree', url: 'Tree.glb' },
-                    { id: 'bigtree', url: 'Big%20Tree.glb' }
+                    { id: 'player', url: 'CAR Model.glb', scale: 20 },
+                    { id: 'police', url: 'Police Car.glb', scale: 20 },
+                    { id: 'block', url: 'Road block.glb', scale: 22 },
+                    { id: 'tree', url: 'Tree.glb', scale: 50 },
+                    { id: 'bigtree', url: 'Big Tree.glb', scale: 70 },
+                    { id: 'b1', url: 'building1.glb', scale: 50 },
+                    { id: 'b2', url: 'building2.glb', scale: 50 }
                 ];
 
                 files.forEach(f => {
                     loader.load(f.url, (glb) => {
-                        // NORMALIZING SCALE - Make them BIG (approx 15x units)
                         const box = new THREE.Box3().setFromObject(glb.scene);
                         const size = box.getSize(new THREE.Vector3());
-                        const scale = 15 / Math.max(size.x, size.y, size.z);
+                        const scale = f.scale / Math.max(size.x, size.y, size.z);
                         glb.scene.scale.set(scale, scale, scale);
-                        
                         glb.scene.traverse(c => { if(c.isMesh) c.castShadow = true; });
                         this.assets[f.id] = glb.scene;
-                    });
+                    }, undefined, () => console.error("Missing: " + f.url));
                 });
+
+                this.flowerTex = new THREE.TextureLoader().load(FLOWER_SVG);
             }
 
-            setupWorld() {
-                // Player Car
+            initWorld() {
+                // Player car
                 this.player = new THREE.Group();
                 const car = this.assets['player'].clone();
-                car.rotation.y = Math.PI; // Face forward
+                car.rotation.y = Math.PI;
                 this.player.add(car);
                 this.scene.add(this.player);
 
-                // Police Car
+                // Police car
                 this.police = this.assets['police'].clone();
                 this.police.position.set(0, 0, -60);
                 this.scene.add(this.police);
-                
-                // Red/Blue Siren Light
-                this.siren = new THREE.PointLight(0xff0000, 100, 50);
-                this.siren.position.set(0, 5, 0);
+                this.siren = new THREE.PointLight(0xff0000, 300, 100);
+                this.siren.position.set(0, 10, 0);
                 this.police.add(this.siren);
 
-                // Initialize Road
-                for (let i = 0; i < 10; i++) {
-                    this.createRoadSegment(i * 120);
+                // Initial Road
+                for (let i = 0; i < 8; i++) {
+                    this.createRoadTile(i * 150);
                 }
 
                 this.animate();
             }
 
-            createRoadSegment(z) {
+            createRoadTile(z) {
                 const group = new THREE.Group();
                 
-                // Main Asphalt Road
-                const roadGeo = new THREE.PlaneGeometry(50, 120);
-                const roadMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.8 });
-                const road = new THREE.Mesh(roadGeo, roadMat);
+                // Road
+                const road = new THREE.Mesh(
+                    new THREE.PlaneGeometry(70, 150),
+                    new THREE.MeshStandardMaterial({ color: 0x1a1a1a })
+                );
                 road.rotation.x = -Math.PI / 2;
                 road.receiveShadow = true;
                 group.add(road);
 
-                // Lane Markings
-                const lineGeo = new THREE.PlaneGeometry(1, 15);
-                const lineMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-                for(let i=0; i<4; i++) {
-                    const l = new THREE.Mesh(lineGeo, lineMat);
-                    l.rotation.x = -Math.PI/2;
-                    l.position.set(-10, 0.1, -45 + i*30);
-                    group.add(l);
-                    const r = l.clone();
-                    r.position.x = 10;
-                    group.add(r);
-                }
-
-                // Grass Sides
-                const grassGeo = new THREE.PlaneGeometry(200, 120);
-                const grassMat = new THREE.MeshStandardMaterial({ color: 0x2d5a27 });
-                const grass = new THREE.Mesh(grassGeo, grassMat);
+                // Grass
+                const grass = new THREE.Mesh(
+                    new THREE.PlaneGeometry(800, 150),
+                    new THREE.MeshStandardMaterial({ color: 0x1d3a1a })
+                );
                 grass.rotation.x = -Math.PI / 2;
                 grass.position.y = -0.2;
                 group.add(grass);
 
-                // Trees (From your GLB)
-                for(let i=0; i<6; i++) {
-                    const side = Math.random() > 0.5 ? 1 : -1;
-                    const type = Math.random() > 0.8 ? 'bigtree' : 'tree';
-                    const tree = this.assets[type].clone();
-                    tree.position.set(side * (40 + Math.random()*20), 0, (Math.random()-0.5)*120);
+                // Decor: Buildings and Huge Trees
+                const side = Math.random() > 0.5 ? 1 : -1;
+                const b = this.assets[Math.random() > 0.5 ? 'b1' : 'b2'].clone();
+                b.position.set(side * 100, 0, 0);
+                b.rotation.y = side > 0 ? -Math.PI/2 : Math.PI/2;
+                group.add(b);
+
+                for(let i=0; i<3; i++) {
+                    const tree = this.assets[Math.random() > 0.5 ? 'tree' : 'bigtree'].clone();
+                    tree.position.set(-side * (130 + Math.random()*50), 0, (Math.random()-0.5)*150);
                     group.add(tree);
+                }
+
+                // Flowers
+                for(let i=0; i<15; i++) {
+                    const flower = new THREE.Sprite(new THREE.SpriteMaterial({ map: this.flowerTex, transparent: true }));
+                    flower.scale.set(5, 5, 1);
+                    flower.position.set((Math.random()-0.5)*400, 2, (Math.random()-0.5)*150);
+                    group.add(flower);
                 }
 
                 group.position.z = z;
@@ -318,190 +314,176 @@
                 this.roadTiles.push(group);
             }
 
-            spawnTraffic() {
-                if(Math.random() < 0.02) {
-                    const lane = Math.floor(Math.random()*3)-1;
-                    const npc = this.assets['player'].clone();
-                    // Color it differently
-                    npc.traverse(c => { if(c.isMesh) {
-                        c.material = c.material.clone();
-                        c.material.color.setHex(Math.random() * 0xffffff);
-                    }});
-                    npc.position.set(lane * 15, 0, this.player.position.z + 250);
-                    npc.userData = { speed: 0.2 + Math.random() * 0.4 };
-                    this.scene.add(npc);
-                    this.traffic.push(npc);
-                }
+            setupInputs() {
+                // SWIPE LOGIC
+                let touchStartX = 0;
+                window.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, false);
+                window.addEventListener('touchend', e => {
+                    if(!this.isRunning) return;
+                    let touchEndX = e.changedTouches[0].clientX;
+                    let diff = touchEndX - touchStartX;
+                    if (Math.abs(diff) > 40) {
+                        if (diff < 0) this.changeLane(-1); // Left Swipe
+                        else this.changeLane(1); // Right Swipe
+                    }
+                }, false);
+
+                // Nitro and Brake
+                const bindBtn = (id, property) => {
+                    const btn = document.getElementById(id);
+                    btn.addEventListener('touchstart', (e) => { e.preventDefault(); this[property] = true; });
+                    btn.addEventListener('touchend', (e) => { e.preventDefault(); this[property] = false; });
+                };
+                bindBtn('btn-nitro', 'nitroActive');
+                bindBtn('btn-brake', 'brakeActive');
+
+                // Buttons
+                document.getElementById('btn-play').onclick = () => this.start();
+                document.getElementById('btn-retry').onclick = () => location.reload();
+                document.getElementById('btn-cam').onclick = () => { this.camMode = (this.camMode + 1) % 2; };
+
+                window.addEventListener('resize', () => {
+                    this.camera.aspect = window.innerWidth / window.innerHeight;
+                    this.camera.updateProjectionMatrix();
+                    this.renderer.setSize(window.innerWidth, window.innerHeight);
+                });
             }
 
-            spawnCoin() {
-                if(Math.random() < 0.05) {
-                    const lane = Math.floor(Math.random()*3)-1;
-                    const geo = new THREE.TorusGeometry(1.5, 0.4, 8, 16);
-                    const mat = new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 1, roughness: 0.1 });
-                    const coin = new THREE.Mesh(geo, mat);
-                    coin.rotation.y = Math.PI/2;
-                    coin.position.set(lane * 15, 3, this.player.position.z + 180);
-                    this.scene.add(coin);
-                    this.items.push(coin);
-                }
+            changeLane(dir) {
+                this.laneIdx = THREE.MathUtils.clamp(this.laneIdx + dir, 0, 2);
+                this.targetX = this.lanes[this.laneIdx];
+            }
+
+            start() {
+                this.isRunning = true;
+                this.speed = 0.5;
+                document.querySelectorAll('.pointer-events-auto').forEach(el => el.classList.add('hidden'));
+                document.getElementById('hud').classList.remove('hidden');
+                document.getElementById('controls-active').classList.remove('hidden');
+                document.getElementById('snd-engine').play();
             }
 
             update(dt) {
                 if(!this.isRunning) return;
 
-                // Driving Physics
-                if(this.keys.brake) this.speed = THREE.MathUtils.lerp(this.speed, -0.2, 0.05);
-                else this.speed = Math.min(3.0, this.speed + 0.003);
+                // Speed Logic
+                let targetSpeed = 2.5;
+                if(this.nitroActive) {
+                    targetSpeed = 4.5;
+                    this.camera.fov = THREE.MathUtils.lerp(this.camera.fov, 85, 0.1);
+                } else if(this.brakeActive) {
+                    targetSpeed = 0.3;
+                    this.camera.fov = THREE.MathUtils.lerp(this.camera.fov, 65, 0.1);
+                } else {
+                    this.camera.fov = THREE.MathUtils.lerp(this.camera.fov, 70, 0.1);
+                }
+                this.camera.updateProjectionMatrix();
+                this.speed = THREE.MathUtils.lerp(this.speed, targetSpeed, 0.04);
 
                 this.player.position.z += this.speed;
                 this.dist += this.speed;
 
-                // Smooth Lane Changing
-                if(this.keys.left) this.targetLane = Math.max(-1.5, this.targetLane - 0.06);
-                if(this.keys.right) this.targetLane = Math.min(1.5, this.targetLane + 0.06);
-                
-                const targetX = this.targetLane * 15;
-                this.player.position.x = THREE.MathUtils.lerp(this.player.position.x, targetX, 0.1);
-                this.player.rotation.y = Math.PI + (this.player.position.x - targetX) * 0.05;
-                this.player.rotation.z = (targetX - this.player.position.x) * 0.05;
+                // Smooth Lane Sliding
+                this.player.position.x = THREE.MathUtils.lerp(this.player.position.x, this.targetX, 0.12);
+                this.player.rotation.y = Math.PI + (this.player.position.x - this.targetX) * 0.05;
+                this.player.rotation.z = (this.targetX - this.player.position.x) * 0.04;
 
-                // Police AI (Follow and Ram)
-                const gap = this.player.position.z - this.police.position.z;
-                let policeTargetSpeed = (gap > 60) ? this.speed * 1.15 : this.speed * 0.98;
-                this.police.position.z += policeTargetSpeed;
+                // Police AI
+                const pGap = this.player.position.z - this.police.position.z;
+                this.police.position.z += (pGap > 60) ? this.speed * 1.1 : this.speed * 0.97;
                 this.police.position.x = THREE.MathUtils.lerp(this.police.position.x, this.player.position.x, 0.03);
-                
-                // Siren Flashing
-                this.siren.intensity = Math.sin(Date.now() * 0.01) > 0 ? 150 : 0;
-                this.siren.color.setHex(Math.sin(Date.now() * 0.01) > 0 ? 0xff0000 : 0x0000ff);
+                this.siren.intensity = Math.sin(Date.now() * 0.02) > 0 ? 300 : 0;
+                this.siren.color.setHex(Math.sin(Date.now() * 0.02) > 0 ? 0xff0000 : 0x00f2ff);
 
-                if(gap < 8) this.gameOver();
+                if(pGap < 10) this.endGame();
 
                 // World Loop
-                this.roadTiles.forEach(t => { if(this.player.position.z - t.position.z > 120) t.position.z += 1200; });
-                this.spawnTraffic();
-                this.spawnCoin();
+                this.roadTiles.forEach(t => { if(this.player.position.z - t.position.z > 150) t.position.z += 1200; });
+                
+                // Spawn items
+                if(Math.random() < 0.01) this.spawnNPC();
+                if(Math.random() < 0.03) this.spawnCoin();
 
-                // Traffic Collision
+                // Collision
                 this.traffic.forEach((n, i) => {
                     n.position.z += n.userData.speed;
-                    if(this.player.position.distanceTo(n.position) < 8) {
+                    if(this.player.position.distanceTo(n.position) < 12) {
                         this.speed *= 0.3;
                         this.scene.remove(n);
                         this.traffic.splice(i, 1);
-                    }
-                    if(this.player.position.z - n.position.z > 50) {
-                        this.scene.remove(n);
-                        this.traffic.splice(i, 1);
+                        document.getElementById('snd-crash').play();
                     }
                 });
 
-                // Coins
                 this.items.forEach((c, i) => {
                     c.rotation.z += 0.1;
-                    if(this.player.position.distanceTo(c.position) < 6) {
-                        this.coins += 50;
+                    if(this.player.position.distanceTo(c.position) < 10) {
+                        this.coins += 100;
                         this.scene.remove(c);
                         this.items.splice(i, 1);
                     }
                 });
 
-                // Camera Logic
-                this.updateCamera();
-                this.updateUI();
+                this.updateCam();
+                this.updateHUD();
             }
 
-            updateCamera() {
+            spawnNPC() {
+                const lane = Math.floor(Math.random()*3)-1;
+                const npc = this.assets['player'].clone();
+                npc.position.set(lane * 22, 0, this.player.position.z + 400);
+                npc.userData = { speed: 0.5 + Math.random() };
+                this.scene.add(npc);
+                this.traffic.push(npc);
+            }
+
+            spawnCoin() {
+                const lane = Math.floor(Math.random()*3)-1;
+                const geo = new THREE.TorusGeometry(2, 0.5, 8, 16);
+                const mat = new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 1 });
+                const coin = new THREE.Mesh(geo, mat);
+                coin.rotation.y = Math.PI/2;
+                coin.position.set(lane * 22, 5, this.player.position.z + 300);
+                this.scene.add(coin);
+                this.items.push(coin);
+            }
+
+            updateCam() {
                 let targetPos, lookAt;
-                switch(this.camMode) {
-                    case 0: // Chase
-                        targetPos = new THREE.Vector3(this.player.position.x * 0.5, 12, this.player.position.z - 35);
-                        lookAt = new THREE.Vector3(this.player.position.x, 4, this.player.position.z + 40);
-                        break;
-                    case 1: // Top
-                        targetPos = new THREE.Vector3(0, 80, this.player.position.z + 20);
-                        lookAt = new THREE.Vector3(0, 0, this.player.position.z + 50);
-                        break;
-                    case 2: // Action
-                        targetPos = new THREE.Vector3(this.player.position.x - 20, 8, this.player.position.z + 10);
-                        lookAt = new THREE.Vector3(this.player.position.x, 2, this.player.position.z + 30);
-                        break;
+                if(this.camMode === 0) { // Chase
+                    targetPos = new THREE.Vector3(this.player.position.x * 0.5, 20, this.player.position.z - 60);
+                    lookAt = new THREE.Vector3(this.player.position.x, 5, this.player.position.z + 50);
+                } else { // Top
+                    targetPos = new THREE.Vector3(0, 200, this.player.position.z + 50);
+                    lookAt = new THREE.Vector3(0, 0, this.player.position.z + 100);
                 }
                 this.camera.position.lerp(targetPos, 0.1);
                 this.camera.lookAt(lookAt);
             }
 
-            updateUI() {
-                document.getElementById('hud-dist').innerText = Math.floor(this.dist) + ' m';
-                document.getElementById('hud-coins').innerText = this.coins;
-                document.getElementById('hud-speed').innerText = Math.floor(this.speed * 120);
+            updateHUD() {
+                document.getElementById('hud-dist').innerText = Math.floor(this.dist);
+                document.getElementById('hud-coins').innerText = '$ ' + this.coins;
+                document.getElementById('hud-speed').innerText = Math.floor(this.speed * 80);
             }
 
-            gameOver() {
+            endGame() {
                 this.isRunning = false;
                 document.getElementById('screen-over').classList.remove('hidden');
                 document.getElementById('hud').classList.add('hidden');
-                document.getElementById('controls').classList.add('hidden');
-                document.getElementById('final-score').innerText = Math.floor(this.dist) + 'm';
-            }
-
-            bindUI() {
-                document.getElementById('btn-play').onclick = () => {
-                    this.isRunning = true;
-                    document.getElementById('screen-menu').classList.add('hidden');
-                    document.getElementById('hud').classList.remove('hidden');
-                    document.getElementById('controls').classList.remove('hidden');
-                };
-
-                document.getElementById('btn-restart').onclick = () => location.reload();
-
-                document.getElementById('btn-cam').onclick = () => {
-                    this.camMode = (this.camMode + 1) % 3;
-                };
-
-                document.getElementById('btn-fs').onclick = () => {
-                    if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-                    else document.exitFullscreen();
-                };
-
-                // Input Bindings
-                const bind = (id, key) => {
-                    const el = document.getElementById(id);
-                    el.ontouchstart = (e) => { e.preventDefault(); this.keys[key] = true; };
-                    el.ontouchend = (e) => { e.preventDefault(); this.keys[key] = false; };
-                };
-                bind('ctrl-left', 'left');
-                bind('ctrl-right', 'right');
-                bind('ctrl-brake', 'brake');
-
-                window.onkeydown = (e) => {
-                    if(e.code === 'ArrowLeft') this.keys.left = true;
-                    if(e.code === 'ArrowRight') this.keys.right = true;
-                    if(e.code === 'Space') this.keys.brake = true;
-                };
-                window.onkeyup = (e) => {
-                    if(e.code === 'ArrowLeft') this.keys.left = false;
-                    if(e.code === 'ArrowRight') this.keys.right = false;
-                    if(e.code === 'Space') this.keys.brake = false;
-                };
-            }
-
-            onResize() {
-                this.camera.aspect = window.innerWidth / window.innerHeight;
-                this.camera.updateProjectionMatrix();
-                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                document.getElementById('controls-active').classList.add('hidden');
+                document.getElementById('final-score').innerText = Math.floor(this.dist);
+                document.getElementById('snd-engine').pause();
             }
 
             animate() {
                 requestAnimationFrame(() => this.animate());
-                const dt = this.clock.getDelta();
-                this.update(dt);
+                this.update(this.clock.getDelta());
                 this.renderer.render(this.scene, this.camera);
             }
         }
 
-        new AnshuCarChase();
+        new AnshuChaseSwipe();
     </script>
 </body>
 </html>
